@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -32,7 +34,11 @@ namespace ADOHW1
 
         public void ConnectDatabase()
         {
-            string connectionString = "Data Source=LEILASHAFI;Initial Catalog=Library;Integrated Security=True;";
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+.AddJsonFile("jsconfig1.json")
+.Build();
+            string connectionString = configuration.GetConnectionString("db1");
+            MessageBox.Show(connectionString);
             connection = new SqlConnection(connectionString);
         }
         public void fillDatas()
@@ -115,7 +121,7 @@ namespace ADOHW1
             {
                 connection?.Close();
                 reader?.Close();
-                srch.Text= null;
+                srch.Text = null;
             }
 
         }
@@ -127,7 +133,7 @@ namespace ADOHW1
                 connection.Open();
 
                 string insertString = "INSERT INTO Books(Id,Name,Pages,YearPress,Id_Themes,Id_Category, Id_Author,Id_Press,Comment,Quantity) VALUES(@id,@bookname,@pages,@year,@idthm,@idcat,@idaut,@idpress,@comment,@quantity)";
-               
+
                 using SqlCommand cmd = new SqlCommand(insertString, connection);
                 cmd.Parameters.AddWithValue("@id", id.Text);
                 cmd.Parameters.AddWithValue("@bookname", name.Text);
@@ -168,9 +174,10 @@ namespace ADOHW1
                 string insertString = "DELETE FROM Books\r\nWHERE [Name]=@p";
 
                 using SqlCommand cmd = new SqlCommand(insertString, connection);
-                cmd.Parameters.AddWithValue("@p",lst.SelectedItem.ToString());
-                
+                cmd.Parameters.AddWithValue("@p", lst.SelectedItem.ToString());
+
                 cmd.ExecuteNonQuery();
+                lst.Items.Remove(lst.SelectedItem);
                 MessageBox.Show("Deleted Successfully");
             }
             catch (Exception ex)
@@ -180,7 +187,7 @@ namespace ADOHW1
             finally
             {
                 connection?.Close();
-                
+
             }
         }
     }
